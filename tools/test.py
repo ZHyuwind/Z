@@ -11,11 +11,21 @@ import cv2
 from PIL import Image
 from os import makedirs
 from os.path import join, isdir, isfile
+import os
+import sys
+sys.path.append(os.path.dirname(__file__) + os.sep + '../')
+
+# from utils.log_helper import init_log, add_file_handler
+# from utils.load_helper import load_pretrain
+# from utils.bbox_helper import get_axis_aligned_bbox, cxy_wh_2_rect
+# from utils.benchmark_helper import load_dataset, dataset_zoo
 
 from utils.log_helper import init_log, add_file_handler
+# from log_helper import init_log, add_file_handler
 from utils.load_helper import load_pretrain
 from utils.bbox_helper import get_axis_aligned_bbox, cxy_wh_2_rect
 from utils.benchmark_helper import load_dataset, dataset_zoo
+
 
 import torch
 from torch.autograd import Variable
