@@ -150,8 +150,8 @@ class Model(ModelDesc):
 
         input_pose_hm = tf.stop_gradient(self.render_gaussian_heatmap(input_pose_coord, cfg.input_shape, cfg.input_sigma, input_pose_valid))
         backbone = eval(cfg.backbone)
-        resnet_fms = backbone([image, input_pose_hm], is_train, bn_trainable=True)
-        heatmap_outs = self.head_net(resnet_fms, is_train)
+        resnet_fms = backbone([image, input_pose_hm], is_train, bn_trainable=True)#input_pose_hm 的size(1,384,288,17)
+        heatmap_outs = self.head_net(resnet_fms, is_train)#(?,96,72,256)
         
         if is_train:
             
@@ -180,7 +180,7 @@ class Model(ModelDesc):
             self.set_loss(loss)
             
         else:
-            out = self.extract_coordinate(heatmap_outs)
+            out = self.extract_coordinate(heatmap_outs)#从heatmap_outs得出坐标
             self.set_outputs(out)
 
 

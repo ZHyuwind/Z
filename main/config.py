@@ -6,8 +6,11 @@ import numpy as np
 class Config:
     
     ## dataset
-    dataset = 'PoseTrack' # 'COCO', 'PoseTrack', 'MPII'
-    testset = 'val' # train, test, val (there is no validation set for MPII)
+    # dataset = 'PoseTrack' # 'COCO', 'PoseTrack', 'MPII'
+    dataset = 'vault_mask' # 'COCO', 'PoseTrack', 'MPII'
+    # dataset = 'vault' # 'COCO', 'PoseTrack', 'MPII'
+    testset = 'test' # train, test, val (there is no validation set for MPII) dataset = 'PoseTrack' # 'COCO', 'PoseTrack', 'MPII'
+    # testset = 'test_image' # train, test, val (there is no validation set for MPII)
 
     ## directory
     cur_dir = osp.dirname(os.path.abspath(__file__))
@@ -21,15 +24,21 @@ class Config:
  
     ## model setting
     backbone = 'resnet152' # 'resnet50', 'resnet101', 'resnet152'
-    init_model = osp.join(data_dir, 'imagenet_weights', 'resnet_v1_' + backbone[6:] + '.ckpt')
-    
+    # init_model = osp.join(data_dir, 'imagenet_weights', 'resnet_v1_' + backbone[6:] + '.ckpt')
+
     ## input, output
-    input_shape = (384, 288) # (256,192), (384,288)
+    # input_shape = (1080,1920)
+    input_shape = (256,192) # (256,192), (384,288)
     output_shape = (input_shape[0]//4, input_shape[1]//4)
     if output_shape[0] == 64:
         input_sigma = 7.0
     elif output_shape[0] == 96:
         input_sigma = 9.0
+
+    # if output_shape[0] == 270:
+    #     input_sigma = 7.0
+    # elif output_shape[0] == 480:
+    #     input_sigma = 9.0
     pixel_means = np.array([[[123.68, 116.78, 103.94]]])
 
     ## training config

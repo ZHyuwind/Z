@@ -224,8 +224,9 @@ class Trainer(Base):
         
         ## modify train_data to the result of the decoupled initial model
         with open(d.test_on_trainset_path, 'r') as f:
-            test_on_trainset = json.load(f)
-        
+            # test_on_trainset = json.load(f)
+            test_on_trainset = json.dump(f)
+            # print(type(test_on_trainset))
         # sort list by img_id
         train_data = sorted(train_data, key=lambda k: k['image_id']) 
         test_on_trainset = sorted(test_on_trainset, key=lambda k: k['image_id'])

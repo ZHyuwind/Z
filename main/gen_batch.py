@@ -350,7 +350,7 @@ def generate_batch(d, stage='train'):
         h = w / aspect_ratio
     elif w < aspect_ratio * h:
         w = h * aspect_ratio
-    scale = np.array([w,h]) * 1.25
+    scale = np.array([w,h]) * 1.25 #为什么要*1.25????
     rotation = 0
 
     if stage == 'train':
@@ -430,9 +430,9 @@ def generate_batch(d, stage='train'):
 
     else:
         trans = get_affine_transform(center, scale, rotation, (cfg.input_shape[1], cfg.input_shape[0]))
-        cropped_img = cv2.warpAffine(img, trans, (cfg.input_shape[1], cfg.input_shape[0]), flags=cv2.INTER_LINEAR)
+        cropped_img = cv2.warpAffine(img, trans, (cfg.input_shape[1], cfg.input_shape[0]), flags=cv2.INTER_LINEAR)#img-输入图像，trans-变换矩阵，input-输出图像大小，flags-线性插值
         #cropped_img = cropped_img[:,:, ::-1]
-        cropped_img = cfg.normalize_input(cropped_img)
+        cropped_img = cfg.normalize_input(cropped_img)#原图pixel-pixel_mean[已知值]
 
         estimated_joints = np.array(d['estimated_joints']).reshape(cfg.num_kps,3)
         for i in range(cfg.num_kps):
@@ -440,10 +440,14 @@ def generate_batch(d, stage='train'):
                 estimated_joints[i,:2] = affine_transform(estimated_joints[i,:2], trans)
                 estimated_joints[i,2] *= ((estimated_joints[i,0] >= 0) & (estimated_joints[i,0] < cfg.input_shape[1]) & (estimated_joints[i,1] >= 0) & (estimated_joints[i,1] < cfg.input_shape[0]))
 
-        input_pose_coord = estimated_joints[:,:2]
-        input_pose_valid = np.array([1 if i not in cfg.ignore_kps else 0 for i in range(cfg.num_kps)])
-        input_pose_score = d['estimated_score']
-        crop_info = np.asarray([center[0]-scale[0]*0.5, center[1]-scale[1]*0.5, center[0]+scale[0]*0.5, center[1]+scale[1]*0.5])
+        input_pose_coord = estimated_joints[:,:2]# keypoints坐标
+        input_pose_valid = np.array([1 if i not in cfg.ignore_kps else 0 for i in range(cfg.num_kps)])#坐标都可信
+        input_pose_score = d['estimated_score']#keypoints的score
+        xmin = max(center[0]-scale[0]*0.5,0)
+        ymin = max(center[1]-scale[1]*0.5,0)
+        xmax = max(center[0]+scale[0]*0.5,0)
+        ymax = max(center[1]+scale[1]*0.5,0)
+        crop_info = np.asarray([xmin,ymin,xmax,ymax])#cropped的box坐标，左上和右下
 
         return [cropped_img, input_pose_coord, input_pose_valid, input_pose_score, crop_info]
 

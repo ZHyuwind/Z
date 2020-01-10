@@ -23,7 +23,7 @@ from gen_batch import generate_batch
 from dataset import Dataset
 from nms.nms import oks_nms
 
-def test_net(tester, input_pose, det_range, gpu_id):
+def test_net(tester, input_pose, det_range, gpu_id):#det_range记录了dataset中图片的个数
 
     dump_results = []
 
@@ -41,17 +41,17 @@ def test_net(tester, input_pose, det_range, gpu_id):
             img_end += 1
         
         # all human detection results of a certain image
-        cropped_data = input_pose[img_start:img_end]
+        cropped_data = input_pose[img_start:img_end]#同一张image的两个pose
         #pbar.set_description("GPU %s" % str(gpu_id))
         pbar.update(img_end - img_start)
 
         img_start = img_end
 
         kps_result = np.zeros((len(cropped_data), cfg.num_kps, 3))
-        area_save = np.zeros(len(cropped_data))
+        area_save = np.zeros(len(cropped_data))#???什么意思？
 
         # cluster human detection results with test_batch_size
-        for batch_id in range(0, len(cropped_data), cfg.test_batch_size):
+        for batch_id in range(0, len(cropped_data), cfg.test_batch_size):#(0,2,32)
             start_id = batch_id
             end_id = min(len(cropped_data), batch_id + cfg.test_batch_size)
              
@@ -102,7 +102,7 @@ def test_net(tester, input_pose, det_range, gpu_id):
                 kps_result[image_id, :, :2] = coord[image_id - start_id]
                 kps_result[image_id, :, 2] = input_pose_scores[image_id - start_id]
 
-                vis=False
+                vis=True
                 crop_info = crop_infos[image_id - start_id,:]
                 area = (crop_info[2] - crop_info[0]) * (crop_info[3] - crop_info[1])
                 if vis and np.any(kps_result[image_id,:,2]) > 0.9 and area > 96**2:
@@ -114,7 +114,9 @@ def test_net(tester, input_pose, det_range, gpu_id):
                     tmpkps[2,:] = kps_result[image_id,:,2]
                     _tmpimg = tmpimg.copy()
                     _tmpimg = cfg.vis_keypoints(_tmpimg, tmpkps)
-                    cv2.imwrite(osp.join(cfg.vis_dir, str(img_id) + '_output.jpg'), _tmpimg)
+                    img_name = cropped_data[0]['image_id']
+                    # cv2.imwrite(osp.join(cfg.vis_dir, str(img_id) + '_output.jpg'), _tmpimg)
+                    cv2.imwrite(osp.join(cfg.vis_dir, str(img_name) + '_output.jpg'), _tmpimg)
                     img_id += 1
 
                 # map back to original images
@@ -166,6 +168,14 @@ def test_net(tester, input_pose, det_range, gpu_id):
             elif cfg.dataset == 'MPII':
                 result = dict(image_id=im_info['image_id'], scores=score_result[i].round(4).tolist(),
                               keypoints=kps_result[i].round(3).tolist())
+            elif cfg.dataset == 'vault':
+                result = dict(image_id=im_info['image_id'], category_id=1,
+                              score=float(round(np.mean(score_result[i]), 4)),
+                              keypoints=kps_result[i].round(3).tolist())
+            elif cfg.dataset == 'vault_mask':
+                result = dict(image_id=im_info['image_id'], category_id=1,
+                              score=float(round(np.mean(score_result[i]), 4)),
+                              keypoints=kps_result[i].round(3).tolist())
 
             dump_results.append(result)
 
@@ -211,8 +221,8 @@ def test(test_model):
 if __name__ == '__main__':
     def parse_args():
         parser = argparse.ArgumentParser()
-        parser.add_argument('--gpu', type=str, dest='gpu_ids')
-        parser.add_argument('--test_epoch', type=str, dest='test_epoch')
+        parser.add_argument('--gpu', type=str, dest='gpu_ids',default=0)
+        parser.add_argument('--test_epoch', type=str, dest='test_epoch',default=140)
         args = parser.parse_args()
 
         # test gpus
